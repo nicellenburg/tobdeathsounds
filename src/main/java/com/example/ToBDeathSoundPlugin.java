@@ -67,7 +67,8 @@ public class ToBDeathSoundPlugin extends Plugin
 		{
 			if (soundStream == null)
 			{
-				System.err.println("Could not find sound file: " + fileName);
+				log.warn("Could not find sound file: {}", fileName);
+
 				return;
 			}
 
