@@ -33,11 +33,7 @@ public class ToBDeathSoundPlugin extends Plugin
 
 	private boolean hasPlayed = false;
 
-	@Override
-	protected void configure()
-	{
-		bind(ToBDeathSoundConfig.class);
-	}
+
 
 	@Subscribe
 	public void onGameTick(GameTick tick)
