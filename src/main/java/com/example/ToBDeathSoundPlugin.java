@@ -11,13 +11,16 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.util.AudioPlayer; // <- new import
+
+import javax.sound.sampled.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 @Slf4j
 @PluginDescriptor(
     name = "ToB Death Sound",
     description = "Plays a sound when a player dies in ToB",
-    tags = {"sound", "death", "tob"}
+    tags = {"tob", "death", "sound"}
 )
 public class ToBDeathSoundPlugin extends Plugin
 {
@@ -65,7 +68,32 @@ public class ToBDeathSoundPlugin extends Plugin
 
     private void playSound(String fileName)
     {
-        AudioPlayer.playSound(fileName);
+        try (InputStream soundStream = getClass().getResourceAsStream("/" + fileName))
+        {
+            if (soundStream == null)
+            {
+                log.warn("Sound file not found: {}", fileName);
+                return;
+            }
+
+            try (AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundStream))
+            {
+                Clip clip = AudioSystem.getClip();
+                clip.open(audioIn);
+
+                FloatControl volumeControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                float volumePercent = config.volume() / 100f;
+                float dB = (float) (20.0 * Math.log10(Math.max(volumePercent, 0.01)));
+                volumeControl.setValue(dB);
+
+                clip.start();
+            }
+        }
+        catch (UnsupportedAudioFileException | IOException | LineUnavailableException | IllegalArgumentException e)
+        {
+            log.warn("Failed to play sound: {}", e.getMessage());
+        }
     }
 }
+
 
