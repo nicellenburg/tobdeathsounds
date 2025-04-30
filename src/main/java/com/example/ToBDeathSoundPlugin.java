@@ -1,4 +1,4 @@
-package com.tobdeathsound;
+package com.tobdeathsounds;
 
 import com.google.inject.Provides;
 import javax.inject.Inject;
@@ -11,89 +11,91 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.audio.AudioPlayer;
 
-import javax.sound.sampled.*;
-import java.io.IOException;
 import java.io.InputStream;
 
 @Slf4j
 @PluginDescriptor(
-    name = "ToB Death Sound",
-    description = "Plays a sound when a player dies in ToB",
-    tags = {"tob", "death", "sound"}
+	name = "ToB Death Sound",
+	description = "Plays a sound when a player dies in ToB",
+	tags = {"tob", "death", "sound"}
 )
 public class ToBDeathSoundPlugin extends Plugin
 {
-    @Inject
-    private Client client;
+	@Inject
+	private Client client;
 
-    @Inject
-    private ToBDeathSoundConfig config;
+	@Inject
+	private ToBDeathSoundConfig config;
 
-    private boolean hasPlayed = false;
+	private boolean hasPlayed = false;
 
-    @Provides
-    ToBDeathSoundConfig provideConfig(ConfigManager configManager)
-    {
-        return configManager.getConfig(ToBDeathSoundConfig.class);
-    }
+	@Override
+	protected void startUp()
+	{
+		hasPlayed = false;
+	}
 
-    @Subscribe
-    public void onGameTick(GameTick tick)
-    {
-        hasPlayed = false;
-    }
+	@Override
+	protected void shutDown()
+	{
+		hasPlayed = false;
+	}
 
-    @Subscribe
-    public void onActorDeath(ActorDeath event)
-    {
-        if (!config.enabled() || hasPlayed || !isInTheatreOfBlood())
-        {
-            return;
-        }
+	@Subscribe
+	public void onGameTick(GameTick tick)
+	{
+		hasPlayed = false;
+	}
 
-        if (event.getActor() instanceof Player)
-        {
-            playSound(config.soundChoice());
-            hasPlayed = true;
-        }
-    }
+	@Subscribe
+	public void onActorDeath(ActorDeath event)
+	{
+		if (!config.enabled() || hasPlayed || !isInTheatreOfBlood())
+			return;
 
-    private boolean isInTheatreOfBlood()
-    {
-        int region = client.getLocalPlayer().getWorldLocation().getRegionID();
-        return region == 14642 || region == 14643 || region == 14644 ||
-               region == 13122 || region == 13123 || region == 13124 || region == 13125;
-    }
+		if (event.getActor() instanceof Player)
+		{
+			playSound(config.soundChoice());
+			hasPlayed = true;
+		}
+	}
 
-    private void playSound(String fileName)
-    {
-        try (InputStream soundStream = getClass().getResourceAsStream("/" + fileName))
-        {
-            if (soundStream == null)
-            {
-                log.warn("Sound file not found: {}", fileName);
-                return;
-            }
+	private boolean isInTheatreOfBlood()
+	{
+		int region = client.getLocalPlayer().getWorldLocation().getRegionID();
+		return region == 14642 || region == 14643 || region == 14644 ||
+			   region == 13122 || region == 13123 || region == 13124 || region == 13125;
+	}
 
-            try (AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundStream))
-            {
-                Clip clip = AudioSystem.getClip();
-                clip.open(audioIn);
+	private void playSound(String fileName)
+	{
+		try (InputStream soundStream = getClass().getResourceAsStream("/" + fileName))
+		{
+			if (soundStream == null)
+			{
+				log.warn("Sound file not found: {}", fileName);
+				return;
+			}
+			AudioPlayer audioPlayer = new AudioPlayer();
+			audioPlayer.play(soundStream, config.volume() / 100f);
+		}
+		catch (Exception e)
+		{
+			log.warn("Failed to play sound file: {}", fileName, e);
+		}
+	}
 
-                FloatControl volumeControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-                float volumePercent = config.volume() / 100f;
-                float dB = (float) (20.0 * Math.log10(Math.max(volumePercent, 0.01)));
-                volumeControl.setValue(dB);
-
-                clip.start();
-            }
-        }
-        catch (UnsupportedAudioFileException | IOException | LineUnavailableException | IllegalArgumentException e)
-        {
-            log.warn("Failed to play sound: {}", e.getMessage());
-        }
-    }
+	@Provides
+	ToBDeathSoundConfig provideConfig(ConfigManager configManager)
+	{
+		return configManager.getConfig(ToBDeathSoundConfig.class);
+	}
 }
+
+
+
+
 
 

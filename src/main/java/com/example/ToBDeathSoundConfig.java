@@ -1,4 +1,4 @@
-package com.tobdeathsound;
+package com.tobdeathsounds;
 
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
