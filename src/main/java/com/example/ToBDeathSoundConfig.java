@@ -34,14 +34,36 @@ public interface ToBDeathSoundConfig extends Config
     }
 
     @ConfigItem(
-        keyName = "soundChoice",
-        name = "Sound Effect",
-        description = "Choose the sound effect to play",
-        position = 2
+            keyName = "soundChoice",
+            name = "Sound Effect",
+            description = "Choose the sound effect to play",
+            position = 2
     )
-    default String soundChoice()
+    default SoundOption soundChoice()
     {
-        return "sports.wav";
+        return SoundOption.SPORTS;
     }
-}
+    enum SoundOption
+    {
+        SPORTS("sports.wav"),
+        ZERK("zerk.wav"),
+        SITSTELLA("sitstella.wav");
 
+        private final String filename;
+
+        SoundOption(String filename)
+        {
+            this.filename = filename;
+        }
+
+        public String getFilename()
+        {
+            return filename;
+        }
+
+        @Override
+        public String toString()
+        {
+            return name().toLowerCase();
+        }
+    }

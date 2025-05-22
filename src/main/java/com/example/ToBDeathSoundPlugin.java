@@ -57,7 +57,8 @@ public class ToBDeathSoundPlugin extends Plugin
 
 		if (event.getActor() instanceof Player)
 		{
-			playSound(config.soundChoice());
+			playSound(config.soundChoice().getFilename());
+
 			hasPlayed = true;
 		}
 	}
