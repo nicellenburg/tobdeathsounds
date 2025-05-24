@@ -20,8 +20,7 @@ import java.util.Set;
 @PluginDescriptor(
 		name = "ToB Death Sound",
 		description = "Plays a sound when a player dies in ToB",
-		tags = {"tob", "death", "sound"},
-		author = "Maercei"
+		tags = {"tob", "death", "sound"}
 )
 public class ToBDeathSoundPlugin extends Plugin
 {
