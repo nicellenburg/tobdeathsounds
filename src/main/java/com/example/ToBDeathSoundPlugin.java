@@ -14,12 +14,14 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.audio.AudioPlayer;
 
 import java.io.InputStream;
+import java.util.Set;
 
 @Slf4j
 @PluginDescriptor(
-	name = "ToB Death Sound",
-	description = "Plays a sound when a player dies in ToB",
-	tags = {"tob", "death", "sound"}
+		name = "ToB Death Sound",
+		description = "Plays a sound when a player dies in ToB",
+		tags = {"tob", "death", "sound"},
+		author = "Maercei"
 )
 public class ToBDeathSoundPlugin extends Plugin
 {
@@ -30,44 +32,67 @@ public class ToBDeathSoundPlugin extends Plugin
 	private ToBDeathSoundConfig config;
 
 	private boolean hasPlayed = false;
+	private int tickCooldown = 0;
+
+	// All region IDs known from Entry, Normal, and Hard modes
+	private static final Set<Integer> TOB_REGION_IDS = Set.of(
+
+			13122, 13123, 13124, 13125,
+			14642, 14643, 14644,
+			45201, 55962, 55977,
+			56016, 55263, 46062,
+			56209, 55953, 44674, 44418, 46258, 46002,
+			49107, 45291, 42789, 48207, 43635
+	);
 
 	@Override
 	protected void startUp()
 	{
 		hasPlayed = false;
+		tickCooldown = 0;
 	}
 
 	@Override
 	protected void shutDown()
 	{
 		hasPlayed = false;
+		tickCooldown = 0;
 	}
 
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
-		hasPlayed = false;
+		// Reset the play flag and cooldown after a few ticks
+		if (tickCooldown > 0)
+		{
+			tickCooldown--;
+		}
+		else
+		{
+			hasPlayed = false;
+		}
 	}
 
 	@Subscribe
 	public void onActorDeath(ActorDeath event)
 	{
-		if (!config.enabled() || hasPlayed || !isInTheatreOfBlood())
+		if (!config.enabled() || hasPlayed || tickCooldown > 0 || !isInTheatreOfBlood())
+		{
 			return;
+		}
 
 		if (event.getActor() instanceof Player)
 		{
 			playSound(config.soundChoice().getFilename());
-
 			hasPlayed = true;
+			tickCooldown = 2; // Delay further sounds for 2 ticks (~1.2s)
 		}
 	}
 
 	private boolean isInTheatreOfBlood()
 	{
 		int region = client.getLocalPlayer().getWorldLocation().getRegionID();
-		return region == 14642 || region == 14643 || region == 14644 ||
-			   region == 13122 || region == 13123 || region == 13124 || region == 13125;
+		return TOB_REGION_IDS.contains(region);
 	}
 
 	private void playSound(String fileName)
@@ -94,6 +119,7 @@ public class ToBDeathSoundPlugin extends Plugin
 		return configManager.getConfig(ToBDeathSoundConfig.class);
 	}
 }
+
 
 
 
