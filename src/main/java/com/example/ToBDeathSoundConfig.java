@@ -6,30 +6,27 @@ import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.Range;
 
 @ConfigGroup("tobdeathsound")
-public interface ToBDeathSoundConfig extends Config
-{
+public interface ToBDeathSoundConfig extends Config {
     @ConfigItem(
-        keyName = "enabled",
-        name = "Enable Plugin",
-        description = "Enable or disable the ToB Death Sound plugin"
+            keyName = "enabled",
+            name = "Enable Plugin",
+            description = "Enable or disable the ToB Death Sound plugin"
     )
-    default boolean enabled()
-    {
+    default boolean enabled() {
         return true;
     }
 
     @Range(
-        min = 0,
-        max = 100
+            min = 0,
+            max = 100
     )
     @ConfigItem(
-        keyName = "volume",
-        name = "Sound Volume",
-        description = "Adjust the sound volume",
-        position = 1
+            keyName = "volume",
+            name = "Sound Volume",
+            description = "Adjust the sound volume",
+            position = 1
     )
-    default int volume()
-    {
+    default int volume() {
         return 100;
     }
 
@@ -39,31 +36,28 @@ public interface ToBDeathSoundConfig extends Config
             description = "Choose the sound effect to play",
             position = 2
     )
-    default SoundOption soundChoice()
-    {
+    default SoundOption soundChoice() {
         return SoundOption.SPORTS;
     }
-    enum SoundOption
-    {
+
+    enum SoundOption {
         SPORTS("sports.wav"),
         ZERK("zerk.wav"),
         SITSTELLA("sitstella.wav");
 
         private final String filename;
 
-        SoundOption(String filename)
-        {
+        SoundOption(String filename) {
             this.filename = filename;
         }
 
-        public String getFilename()
-        {
+        public String getFilename() {
             return filename;
         }
 
         @Override
-        public String toString()
-        {
+        public String toString() {
             return name().toLowerCase();
         }
     }
+}
